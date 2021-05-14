@@ -15,6 +15,8 @@ public class MessageReceive extends CyclicBehaviour {
     /* Messages types */
     public static final String C_NEW_BOMB = "new-bomb";
     public static final String C_TARGET_BOMB = "target-bomb";
+    public static final String C_PICK_BOMB = "pick-up-bomb";
+    public static final String C_TRAP_BOMB = "trap-bomb";
 
     /**
      * Ctr
@@ -49,6 +51,48 @@ public class MessageReceive extends CyclicBehaviour {
         else if (messageData[0].equals(C_TARGET_BOMB)) {
             targetBombEvent(messageData);
         }
+        /* PickUP bomb */
+        else if (messageData[0].equals(C_PICK_BOMB)) {
+            pickUpBombEvent(messageData);
+        }
+        /* Trap bomb */
+        else if (messageData[0].equals(C_TRAP_BOMB)) {
+            trapBombEvent(messageData);
+        }
+    }
+
+    /**
+     * Trap Bomb Event
+     * 
+     * @param messageData
+     */
+    private void trapBombEvent(String[] messageData) {
+        String sender = messageData[1];
+        String[] pointData = messageData[2].split(",");
+
+        /* Mark as targeted */
+        Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+        agent.trapBomb(sender, bombPoint);
+
+        /* Log */
+        System.out.println("TRAP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
+    }
+
+    /**
+     * PickUP Bomb Event
+     * 
+     * @param messageData
+     */
+    private void pickUpBombEvent(String[] messageData) {
+        String sender = messageData[1];
+        String[] pointData = messageData[2].split(",");
+
+        /* Mark as targeted */
+        Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+        agent.markBombAsPickedUp(sender, bombPoint);
+
+        /* Log */
+        System.out.println("PICKUP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
     }
 
     /**
@@ -65,7 +109,7 @@ public class MessageReceive extends CyclicBehaviour {
         agent.markBombAsTargeted(sender, bombPoint);
 
         /* Log */
-        System.out.println("TARGET-BOM-MESSAGE\t" + sender + " " + messageData[2]);
+        System.out.println("TARGET-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
     }
 
     /**

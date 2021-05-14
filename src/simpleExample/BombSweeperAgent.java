@@ -12,7 +12,9 @@ import gridworld.TypeObject;
 import jade.core.Agent;
 import simpleExample.behaviors.MessageReceive;
 import simpleExample.behaviors.SendBombDiscoverMessage;
+import simpleExample.behaviors.SendPickUpBombMessage;
 import simpleExample.behaviors.SendTargetBombMessage;
+import simpleExample.behaviors.SendTrapBombMessage;
 
 /**
  * Bomb Sweeper import jade.lang.acl.ACLMessage;agent class
@@ -120,6 +122,20 @@ public class BombSweeperAgent extends Agent {
     }
 
     /**
+     * Trap a bomb
+     * 
+     * @param bombPoint
+     */
+    public void trapBomb(String agent, Point bombPoint) {
+        if (bombs.containsKey(bombPoint.toString())) {
+            System.out.printf("\nBOMB trapped at %s by %s\n\n", bombPoint.toString(), agent);
+
+            /* Add to bombs list */
+            bombs.remove(bombPoint.toString());
+        }
+    }
+
+    /**
      * Mark a bomb as picked-up
      * 
      * @param bombPoint
@@ -131,6 +147,20 @@ public class BombSweeperAgent extends Agent {
             /* Add to bombs list */
             bombs.get(bombPoint.toString()).pickedUpBy = agent;
         }
+    }
+
+    /**
+     * Clear the selected bomb
+     * 
+     * @param bombPoint
+     */
+    public void clearSelectedBomb() {
+        String name = getLocalName();
+
+        this.selectedBomb = null;
+        System.out.println(name + "\t SelectedBomb has been cleared");
+
+        /* Send message to all agents */
     }
 
     /**
@@ -152,6 +182,9 @@ public class BombSweeperAgent extends Agent {
 
                     /* Mark bomb as picked-up */
                     markBombAsPickedUp(name, agentPoint);
+
+                    /* Send pickup bomb message */
+                    addBehaviour(new SendPickUpBombMessage(BombSweeperAgent.this, this.selectedBomb));
                 } else {
                     /* Move toward the bomb to picked it up */
                     moveToPoint(env, this.selectedBomb.point);
@@ -167,15 +200,22 @@ public class BombSweeperAgent extends Agent {
                     System.out.println(name + "\t" + agentPoint.toString() + "\tMoving toward the nearest trap"
                             + nearestTrap.toString());
 
-                    /* Check agent position */
-
                     /* If we are at the trap point */
                     if (agentPoint.equals(nearestTrap)) {
+                        /* If agent could drop the bomb in trap successfully */
                         if (env.drop(name)) {
-                            System.out.println(name + "\t Dropping bomb in trap failed");
-                        } else {
-                            System.out.println(name + "\tNo Any trap successfully");
-                            /* Send Traped-bomb message to agents */
+                            /* Find trapped bomb */
+                            if (bombs.containsKey(this.selectedBomb.point.toString())) {
+                                /* Trap the bomb */
+                                this.trapBomb(name, this.selectedBomb.point);
+                                System.out.println(name + "\t Dropping bomb in trap successflully");
+
+                                /* Send message to other agents */
+                                addBehaviour(new SendTrapBombMessage(BombSweeperAgent.this, this.selectedBomb));
+
+                                /* Clear seleted bomb */
+                                this.clearSelectedBomb();
+                            }
                         }
                     } else {
                         /* move to the neareset trap */
