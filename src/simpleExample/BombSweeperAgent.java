@@ -159,8 +159,29 @@ public class BombSweeperAgent extends Agent {
             }
             /* If bomb is picked-up */
             else {
-                System.out.println(name + "\tMoving toward the nearest trap");
-                /* move to the neareset trap */
+                Point nearestTrap = GlobalHelper.nearestTrap(agentPoint);
+
+                if (null == nearestTrap) {
+                    System.out.println(name + "\tNo Any trap found");
+                } else {
+                    System.out.println(name + "\t" + agentPoint.toString() + "\tMoving toward the nearest trap"
+                            + nearestTrap.toString());
+
+                    /* Check agent position */
+
+                    /* If we are at the trap point */
+                    if (agentPoint.equals(nearestTrap)) {
+                        if (env.drop(name)) {
+                            System.out.println(name + "\t Dropping bomb in trap failed");
+                        } else {
+                            System.out.println(name + "\tNo Any trap successfully");
+                            /* Send Traped-bomb message to agents */
+                        }
+                    } else {
+                        /* move to the neareset trap */
+                        moveToPoint(env, nearestTrap);
+                    }
+                }
             }
         }
         /* NO any bomb selected */
@@ -178,7 +199,7 @@ public class BombSweeperAgent extends Agent {
                     return;
                 }
 
-                System.out.println("Selected nearest bomb is " + nearestBomb.point.toString());
+                System.out.println(name + "\tSelected nearest bomb is " + nearestBomb.point.toString());
 
                 /* Select the nearest bomb */
                 this.selectedBomb = nearestBomb;

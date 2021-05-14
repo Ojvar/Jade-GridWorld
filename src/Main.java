@@ -2,6 +2,7 @@
 import java.awt.Point;
 
 import gridworld.LogicalEnv;
+import gridworld.TypeObject;
 import gridworld.lib.ObsVectListener;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -67,14 +68,20 @@ public class Main {
         env.addTrapsListener(new ObsVectListener() {
             @Override
             public void onAdd(int index, Object element) {
+                TypeObject tObj = (TypeObject) element;
+                Point newTrap = tObj.getPosition();
+
                 System.out.println("NEW TRAP ADDED " + element.toString());
-                GlobalHelper.traps.add((Point) element);
+                GlobalHelper.traps.add(newTrap);
             }
 
             @Override
             public void onRemove(int index, Object element) {
+                TypeObject tObj = (TypeObject) element;
+                Point removedTrap = tObj.getPosition();
+
                 System.out.println("TRAP REMOVED " + element.toString());
-                GlobalHelper.traps.remove(element);
+                GlobalHelper.traps.remove(removedTrap);
             }
         });
     }

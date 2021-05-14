@@ -1,6 +1,7 @@
 package simpleExample;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +12,7 @@ import jade.lang.acl.ACLMessage;
 
 public class GlobalHelper {
     public static HashMap<String, Agent> agents = new HashMap<String, Agent>();
-    public static HashSet<Point> traps = new HashSet<Point>();
+    public static ArrayList<Point> traps = new ArrayList<Point>();
 
     /**
      * Add all agents as receivers
@@ -69,5 +70,38 @@ public class GlobalHelper {
         }
 
         return nearestBomb;
+    }
+
+    /**
+     * Find the nearest Trap
+     * 
+     * @param point
+     * @return
+     */
+    public static Point nearestTrap(Point point) {
+        Point nearestTrap = null;
+        int nearestTrapDist = 0;
+
+        Iterator<Point> trapIter = traps.iterator();
+
+        while (trapIter.hasNext()) {
+            Point nextTrap = trapIter.next();
+
+            if (null == nearestTrap) {
+                nearestTrap = nextTrap;
+                nearestTrapDist = calcDistance(point, nextTrap);
+            } else {
+                int newTargetDist = calcDistance(point, nextTrap);
+
+                if (newTargetDist < nearestTrapDist) {
+                    nearestTrap = nextTrap;
+                    nearestTrapDist = newTargetDist;
+                }
+            }
+
+            System.out.println("Distance Agent and trap " + point.toString() + " " + nearestTrap.toString());
+        }
+
+        return nearestTrap;
     }
 }
