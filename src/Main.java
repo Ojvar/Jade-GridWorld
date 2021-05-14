@@ -1,6 +1,7 @@
 
 import java.awt.Point;
 
+import BombSweeper.GlobalHelper;
 import gridworld.LogicalEnv;
 import gridworld.TypeObject;
 import gridworld.lib.ObsVectListener;
@@ -10,7 +11,6 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import BombSweeper.GlobalHelper;
 
 /***
  * Main class**

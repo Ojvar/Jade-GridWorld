@@ -7,14 +7,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import gridworld.LogicalEnv;
-import gridworld.TypeObject;
-import jade.core.Agent;
 import BombSweeper.behaviors.MessageReceive;
 import BombSweeper.behaviors.SendBombDiscoverMessage;
 import BombSweeper.behaviors.SendPickUpBombMessage;
 import BombSweeper.behaviors.SendTargetBombMessage;
 import BombSweeper.behaviors.SendTrapBombMessage;
+import gridworld.LogicalEnv;
+import gridworld.TypeObject;
+import jade.core.Agent;
 
 /**
  * Bomb Sweeper import jade.lang.acl.ACLMessage;agent class
