@@ -43,23 +43,41 @@ public class MessageReceive extends CyclicBehaviour {
 
         /* New Bomb */
         if (messageData[0].equals(C_NEW_BOMB)) {
-            // String sender = messageData[1];
-            String[] pointData = messageData[2].split(",");
-
-            Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
-            agent.addBombToList(bombPoint);
+            newBombEvent(messageData);
         }
         /* Target bomb */
         else if (messageData[0].equals(C_TARGET_BOMB)) {
-            String sender = messageData[1];
-            String[] pointData = messageData[2].split(",");
-
-            /* Mark as targeted */
-            Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
-            agent.markBombAsTargeted(sender, bombPoint);
-
-            /* Log */
-            System.out.println("TARGET-BOM-MESSAGE\t" + sender + " " + messageData[2]);
+            targetBombEvent(messageData);
         }
+    }
+
+    /**
+     * Target Bomb Event
+     * 
+     * @param messageData
+     */
+    private void targetBombEvent(String[] messageData) {
+        String sender = messageData[1];
+        String[] pointData = messageData[2].split(",");
+
+        /* Mark as targeted */
+        Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+        agent.markBombAsTargeted(sender, bombPoint);
+
+        /* Log */
+        System.out.println("TARGET-BOM-MESSAGE\t" + sender + " " + messageData[2]);
+    }
+
+    /**
+     * New Bomb Event
+     * 
+     * @param messageData
+     */
+    private void newBombEvent(String[] messageData) {
+        String sender = messageData[1];
+        String[] pointData = messageData[2].split(",");
+
+        Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+        agent.addBombToList(sender, bombPoint);
     }
 }
