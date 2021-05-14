@@ -1,4 +1,4 @@
-package simpleExample;
+package BombSweeper;
 
 import java.awt.Point;
 import java.util.HashMap;
@@ -10,11 +10,11 @@ import java.util.Set;
 import gridworld.LogicalEnv;
 import gridworld.TypeObject;
 import jade.core.Agent;
-import simpleExample.behaviors.MessageReceive;
-import simpleExample.behaviors.SendBombDiscoverMessage;
-import simpleExample.behaviors.SendPickUpBombMessage;
-import simpleExample.behaviors.SendTargetBombMessage;
-import simpleExample.behaviors.SendTrapBombMessage;
+import BombSweeper.behaviors.MessageReceive;
+import BombSweeper.behaviors.SendBombDiscoverMessage;
+import BombSweeper.behaviors.SendPickUpBombMessage;
+import BombSweeper.behaviors.SendTargetBombMessage;
+import BombSweeper.behaviors.SendTrapBombMessage;
 
 /**
  * Bomb Sweeper import jade.lang.acl.ACLMessage;agent class

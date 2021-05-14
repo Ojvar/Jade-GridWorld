@@ -1,10 +1,10 @@
-package simpleExample.behaviors;
+package BombSweeper.behaviors;
 
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
-import simpleExample.Bomb;
-import simpleExample.GlobalHelper;
+import BombSweeper.Bomb;
+import BombSweeper.GlobalHelper;
 
 /**
  * Send Trap a bomb message

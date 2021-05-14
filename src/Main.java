@@ -10,7 +10,7 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import simpleExample.GlobalHelper;
+import BombSweeper.GlobalHelper;
 
 /***
  * Main class**
@@ -21,8 +21,8 @@ import simpleExample.GlobalHelper;
 public class Main {
     /* Agent colors */
     private final static String[] C_AGENTS = new String[] { "blue", "red", "green", "pink", "orange", "cyna", };
-    private final static int C_AGENTS_COUNT = 2;
-    private final static int C_SENSE_RANGE = 1;
+    private final static int C_AGENTS_COUNT = 3;
+    private final static int C_SENSE_RANGE = 2;
 
     /**
      * Main loop
@@ -95,7 +95,7 @@ public class Main {
                 String color = C_AGENTS[i - 1];
 
                 /* Create and start an agent */
-                AgentController ag = cc.createNewAgent(color + i, "simpleExample.BombSweeperAgent",
+                AgentController ag = cc.createNewAgent(color + i, "BombSweeper.BombSweeperAgent",
                         new Object[] { color });
 
                 ag.start();

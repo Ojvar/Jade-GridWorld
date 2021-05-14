@@ -1,4 +1,4 @@
-package simpleExample;
+package BombSweeper;
 
 import java.awt.Point;
 import java.util.ArrayList;

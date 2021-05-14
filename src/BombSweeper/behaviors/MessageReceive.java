@@ -1,10 +1,10 @@
-package simpleExample.behaviors;
+package BombSweeper.behaviors;
 
 import java.awt.Point;
 
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import simpleExample.BombSweeperAgent;
+import BombSweeper.BombSweeperAgent;
 
 /**
  * Message receive

@@ -1,22 +1,22 @@
-package simpleExample.behaviors;
+package BombSweeper.behaviors;
 
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
-import simpleExample.Bomb;
-import simpleExample.GlobalHelper;
+import BombSweeper.Bomb;
+import BombSweeper.GlobalHelper;
 
 /**
- * Send PickUP a bomb message
+ * Send target a bomb message
  */
-public class SendPickUpBombMessage extends OneShotBehaviour {
+public class SendTargetBombMessage extends OneShotBehaviour {
 	private Bomb bomb = null;
 	private Agent agent = null;
 
 	/**
 	 * Ctr
 	 */
-	public SendPickUpBombMessage(Agent agent, Bomb bomb) {
+	public SendTargetBombMessage(Agent agent, Bomb bomb) {
 		this.bomb = bomb;
 		this.agent = agent;
 	}
@@ -27,7 +27,7 @@ public class SendPickUpBombMessage extends OneShotBehaviour {
 	@Override
 	public void action() {
 		ACLMessage message = new ACLMessage(ACLMessage.INFORM);
-		String content = MessageReceive.C_PICK_BOMB + "\t" + this.agent.getLocalName() + "\t" + this.bomb.toString();
+		String content = MessageReceive.C_TARGET_BOMB + "\t" + this.agent.getLocalName() + "\t" + this.bomb.toString();
 
 		GlobalHelper.addAllAgentsAsReceiver(agent, message);
 		message.setContent(content);
