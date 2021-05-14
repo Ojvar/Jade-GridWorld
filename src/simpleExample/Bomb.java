@@ -3,9 +3,9 @@ package simpleExample;
 import java.awt.Point;
 
 /**
- * Mine class
+ * Bomb class
  */
-public class Mine {
+public class Bomb {
     public Point point;
     public String pickedUpBy = null;
     public String targetedBy = null;
@@ -15,7 +15,7 @@ public class Mine {
      * 
      * @param point
      */
-    public Mine(Point point) {
+    public Bomb(Point point) {
         this.point = point;
     }
 
@@ -29,7 +29,7 @@ public class Mine {
     }
 
     /**
-     * Set mine as a sensed mine
+     * Set bomb as a sensed bomb
      * 
      * @param agent
      */
@@ -47,7 +47,7 @@ public class Mine {
     }
 
     /**
-     * Set mine as a targeted-mine
+     * Set bomb as a targeted-bomb
      * 
      * @param agent
      */

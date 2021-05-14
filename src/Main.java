@@ -88,7 +88,7 @@ public class Main {
                 String color = C_AGENTS[i - 1];
 
                 /* Create and start an agent */
-                AgentController ag = cc.createNewAgent(color + i, "simpleExample.MineSweeperAgent",
+                AgentController ag = cc.createNewAgent(color + i, "simpleExample.BombSweeperAgent",
                         new Object[] { color });
 
                 ag.start();
