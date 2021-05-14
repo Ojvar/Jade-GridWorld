@@ -22,7 +22,7 @@ public class Main {
     /* Agent colors */
     private final static String[] C_AGENTS = new String[] { "blue", "red", "green", "pink", "orange", "cyna", };
     private final static int C_AGENTS_COUNT = 3;
-    private final static int C_SENSE_RANGE = 2;
+    private final static int C_SENSE_RANGE = 1;
 
     /**
      * Main loop
