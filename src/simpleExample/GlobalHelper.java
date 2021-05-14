@@ -1,6 +1,6 @@
 package simpleExample;
 
-import java.util.ArrayList;
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -9,6 +9,7 @@ import jade.lang.acl.ACLMessage;
 
 public class GlobalHelper {
     public static HashMap<String, Agent> agents = new HashMap<String, Agent>();
+    public static HashSet<Point> traps = new HashSet<Point>();
 
     /**
      * Add all agents as receivers

@@ -1,11 +1,15 @@
 
+import java.awt.Point;
+
 import gridworld.LogicalEnv;
+import gridworld.lib.ObsVectListener;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import simpleExample.GlobalHelper;
 
 /***
  * Main class**
@@ -58,6 +62,21 @@ public class Main {
         final LogicalEnv env = LogicalEnv.getEnv();
 
         env.setSenseRange(C_SENSE_RANGE);
+
+        /* Add trap listener */
+        env.addTrapsListener(new ObsVectListener() {
+            @Override
+            public void onAdd(int index, Object element) {
+                System.out.println("NEW TRAP ADDED " + element.toString());
+                GlobalHelper.traps.add((Point) element);
+            }
+
+            @Override
+            public void onRemove(int index, Object element) {
+                System.out.println("TRAP REMOVED " + element.toString());
+                GlobalHelper.traps.remove(element);
+            }
+        });
     }
 
     /**

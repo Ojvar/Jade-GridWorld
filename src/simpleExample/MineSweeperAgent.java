@@ -133,7 +133,7 @@ public class MineSweeperAgent extends Agent {
             public void run() {
                 try {
                     while (MineSweeperAgent.this.isAlive()) {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
 
                         /* Sense all possible mines */
                         MineSweeperAgent.this.updateMinesList(env);
