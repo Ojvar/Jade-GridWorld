@@ -12,6 +12,10 @@ import simpleExample.BombSweeperAgent;
 public class MessageReceive extends CyclicBehaviour {
     private BombSweeperAgent agent = null;
 
+    /* Messages types */
+    public static final String C_NEW_BOMB = "new-bomb";
+    public static final String C_TARGET_BOMB = "target-bomb";
+
     /**
      * Ctr
      */
@@ -38,11 +42,24 @@ public class MessageReceive extends CyclicBehaviour {
         String[] messageData = content.split("\t");
 
         /* New Bomb */
-        if (messageData[0].equals("new-bomb")) {
-            String[] pointData = messageData[1].split(",");
+        if (messageData[0].equals(C_NEW_BOMB)) {
+            // String sender = messageData[1];
+            String[] pointData = messageData[2].split(",");
 
             Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
             agent.addBombToList(bombPoint);
+        }
+        /* Target bomb */
+        else if (messageData[0].equals(C_TARGET_BOMB)) {
+            String sender = messageData[1];
+            String[] pointData = messageData[2].split(",");
+
+            /* Mark as targeted */
+            Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+            agent.markBombAsTargeted(sender, bombPoint);
+
+            /* Log */
+            System.out.println("TARGET-BOM-MESSAGE\t" + sender + " " + messageData[2]);
         }
     }
 }

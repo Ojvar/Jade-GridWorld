@@ -7,16 +7,16 @@ import simpleExample.Bomb;
 import simpleExample.GlobalHelper;
 
 /**
- * Send bomb find message
+ * Send target a bomb message
  */
-public class SendBombDiscoverMessage extends OneShotBehaviour {
+public class SendTargetBombMessage extends OneShotBehaviour {
 	private Bomb bomb = null;
 	private Agent agent = null;
 
 	/**
 	 * Ctr
 	 */
-	public SendBombDiscoverMessage(Agent agent, Bomb bomb) {
+	public SendTargetBombMessage(Agent agent, Bomb bomb) {
 		this.bomb = bomb;
 		this.agent = agent;
 	}
@@ -27,7 +27,7 @@ public class SendBombDiscoverMessage extends OneShotBehaviour {
 	@Override
 	public void action() {
 		ACLMessage message = new ACLMessage(ACLMessage.INFORM);
-		String content = MessageReceive.C_NEW_BOMB + "\t" + this.agent.getLocalName() + "\t" + this.bomb.toString();
+		String content = MessageReceive.C_TARGET_BOMB + "\t" + this.agent.getLocalName() + "\t" + this.bomb.toString();
 
 		GlobalHelper.addAllAgentsAsReceiver(agent, message);
 		message.setContent(content);
