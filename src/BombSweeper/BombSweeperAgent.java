@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 
+import BombSweeper.Messages.DropBombMessage;
 import BombSweeper.Messages.MessageReceiver;
 import BombSweeper.Messages.SenseBombMessage;
 import BombSweeper.Messages.TargetBombMessage;
@@ -155,6 +156,7 @@ public class BombSweeperAgent extends Agent {
      */
     protected void moveAgent() {
         Bomb selectedBomb = bombManager.selectedBomb();
+        Point agentLocation = getLocation();
 
         /* (IF) We have not any bomb in the list */
         if (this.bombManager.getBombs().size() == 0 || null == selectedBomb) {
@@ -166,23 +168,69 @@ public class BombSweeperAgent extends Agent {
         /* (IF) We target a bomb */
         if (selectedBomb.isPickedUp) {
             /* We should go toward the trap and drop the bomb */
-            /* 1- Get the nearest trap location */
-            /* 2- Move toward that */
-        } else {
-            if (getLocation().equals(selectedBomb.point)) {
-                this.pickUpBomb();
-            } else {
-                /* We should go toward the bomb and picked-it up */
-                moveToPoint(selectedBomb.point, true);
+
+            /* Get the nearest trap location */
+            Point nearestTrap = GlobalHelper.nearestTrap(agentLocation);
+
+            if (null == nearestTrap) {
+                GlobalHelper.logMessage("No any trap found");
+                return;
             }
+
+            /* Check for location */
+            if (nearestTrap.equals(agentLocation)) {
+                if (!dropBomb()) {
+                    GlobalHelper.logMessage("ERROR\t" + getLocalName() + "\tDrop bomb failed\n\t\t" + agentLocation);
+                    return;
+                }
+            }
+
+            /* Move toward that */
+            moveToPoint(nearestTrap, true);
+        } else {
+            if (agentLocation.equals(selectedBomb.point) && !selectedBomb.isPickedUp) {
+                if (!this.pickUpBomb()) {
+                    GlobalHelper.logMessage("ERROR\t" + getLocalName() + "\tPickUp bomb failed\n\t\t" + agentLocation);
+                    return;
+                }
+            }
+
+            /* We should go toward the bomb and picked-it up */
+            moveToPoint(selectedBomb.point, true);
         }
+    }
+
+    /**
+     * Remove a bomb
+     */
+    public void removeBomb(Bomb bomb) {
+        this.bombManager.removeBomb(bomb);
+    }
+
+    /**
+     * Drop bomb
+     */
+    public boolean dropBomb() {
+        Bomb selectedBomb = bombManager.selectedBomb();
+
+        /* Try to drop bomb */
+        boolean res = bombManager.dropBomb();
+
+        if (res) {
+            sendDropBombMessage(selectedBomb);
+
+            /* Remove bomb from the list */
+            bombManager.removeBomb(selectedBomb);
+        }
+
+        return res;
     }
 
     /**
      * Pick up the bomb
      */
     private boolean pickUpBomb() {
-        return env.pickup(this.getLocalName());
+        return bombManager.pickUpBomb();
     }
 
     /**
@@ -307,6 +355,13 @@ public class BombSweeperAgent extends Agent {
      */
     public void sendSenseBombMessage(Bomb bomb) {
         addBehaviour(new SenseBombMessage(this, bomb));
+    }
+
+    /**
+     * Send drop-bomb message
+     */
+    private void sendDropBombMessage(Bomb bomb) {
+        addBehaviour(new DropBombMessage(this, bomb));
     }
 
     /**

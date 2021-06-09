@@ -193,4 +193,45 @@ public class BombsManager {
             }
         }
     }
+
+    /**
+     * Try to pick-up the bomb
+     * 
+     * @return
+     */
+    public boolean pickUpBomb() {
+        boolean res = env.pickup(agent.getLocalName());
+
+        if (res) {
+            selectedBomb.isPickedUp = true;
+        }
+
+        return res;
+    }
+
+    /**
+     * Remove bomb
+     * 
+     * @param bomb
+     */
+    public void removeBomb(Bomb bomb) {
+        if (bombs.containsKey(bomb.point.toString())) {
+            bombs.remove(bomb.point.toString());
+        }
+
+        if (null != this.selectedBomb && this.selectedBomb.point.equals(bomb.point)) {
+            this.unselectBomb();
+        }
+    }
+
+    /**
+     * Try to drop the bomb
+     * 
+     * @return
+     */
+    public boolean dropBomb() {
+        boolean res = env.drop(agent.getLocalName());
+
+        return res;
+    }
 }
