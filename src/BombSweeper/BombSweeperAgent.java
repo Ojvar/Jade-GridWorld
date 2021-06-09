@@ -137,13 +137,14 @@ public class BombSweeperAgent extends Agent {
                     /* Make a delay */
                     BombSweeperAgent.this.makeDelay();
 
-                    /* 1- Sense bombs and Target nearest bomb */
+                    /* 1- Sense bombs */
                     BombSweeperAgent.this.senseBombs();
 
-                    /* 2- If we have not any */
+                    /* 2- Target nearest bomb */
+                    BombSweeperAgent.this.targetNearestBomb();
 
-                    /* X - Move agent */
-                    // BombSweeperAgent.this.moveAgent(new Point(0, 0));
+                    /* 3 - Move agent */
+                    BombSweeperAgent.this.moveAgent();
                 }
             }
         }).start();
@@ -152,11 +153,36 @@ public class BombSweeperAgent extends Agent {
     /**
      * Move agent
      */
-    protected void moveAgent(Point point) {
-        /* Move random */
-        if (point.equals(new Point(0, 0))) {
-            this.moveToPoint(new Point(0, 0), true);
+    protected void moveAgent() {
+        Bomb selectedBomb = bombManager.selectedBomb();
+
+        /* (IF) We have not any bomb in the list */
+        if (this.bombManager.getBombs().size() == 0 || null == selectedBomb) {
+            /* Move random */
+            this.moveToPoint(new Point(-1, -1), true);
+            return;
         }
+
+        /* (IF) We target a bomb */
+        if (selectedBomb.isPickedUp) {
+            /* We should go toward the trap and drop the bomb */
+            /* 1- Get the nearest trap location */
+            /* 2- Move toward that */
+        } else {
+            if (getLocation().equals(selectedBomb.point)) {
+                this.pickUpBomb();
+            } else {
+                /* We should go toward the bomb and picked-it up */
+                moveToPoint(selectedBomb.point, true);
+            }
+        }
+    }
+
+    /**
+     * Pick up the bomb
+     */
+    private boolean pickUpBomb() {
+        return env.pickup(this.getLocalName());
     }
 
     /**
@@ -166,7 +192,7 @@ public class BombSweeperAgent extends Agent {
         int direction = 0;
         String agentName = getLocalName();
 
-        if (point.equals(new Point(0, 0))) {
+        if (point.equals(new Point(-1, -1))) {
             /* Random move */
             direction = new Random().nextInt(4) + 1;
         } else {
@@ -225,7 +251,7 @@ public class BombSweeperAgent extends Agent {
          * move
          */
         if (!moveResult && moveRandOnFailed) {
-            moveToPoint(new Point(0, 0), false);
+            moveToPoint(new Point(-1, -1), false);
         }
     }
 
@@ -235,21 +261,24 @@ public class BombSweeperAgent extends Agent {
     protected void senseBombs() {
         /* Update bombs list */
         ArrayList<Bomb> bombs = this.bombManager.updateBombs();
+        if (0 < bombs.size()) {
+            /* Send all bombs data to ther */
+            Iterator<Bomb> iter = bombs.iterator();
+            while (iter.hasNext()) {
+                Bomb bomb = iter.next();
 
-        if (0 == bombs.size()) {
-            return;
+                this.sendSenseBombMessage(bomb);
+            }
         }
+    }
 
-        /* Send all bombs data to ther */
-        Iterator<Bomb> iter = bombs.iterator();
-        while (iter.hasNext()) {
-            Bomb bomb = iter.next();
-
-            this.sendSenseBombMessage(bomb);
-        }
-
+    /**
+     * Target the nearest bomb
+     */
+    protected void targetNearestBomb() {
         /* Select the nearest bomb */
         Bomb bomb = this.bombManager.selectNearestBomb();
+
         if (null != bomb) {
             this.sendTargetBombMessage(bomb);
         }

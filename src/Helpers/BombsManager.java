@@ -69,6 +69,15 @@ public class BombsManager {
     }
 
     /**
+     * Get the selectedBomb
+     * 
+     * @return
+     */
+    public Bomb selectedBomb() {
+        return this.selectedBomb;
+    }
+
+    /**
      * Select nearest bomb
      */
     public Bomb selectNearestBomb() {
@@ -137,7 +146,8 @@ public class BombsManager {
             /* Add new bomb to bombs-list */
             this.bombs.put(bomb.point.toString(), bomb);
 
-            // GlobalHelper.logMessage("(ADD BOMB)\t" + agent.getLocalName() + "\tNEW BOMB Added\n\t\t" + bomb);
+            // GlobalHelper.logMessage("(ADD BOMB)\t" + agent.getLocalName() + "\tNEW BOMB
+            // Added\n\t\t" + bomb);
         }
 
         return bomb;

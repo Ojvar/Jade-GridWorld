@@ -12,6 +12,7 @@ public class Bomb {
     public Point point;
     public Date targeteDate;
     public String targetedBy;
+    public boolean isPickedUp = false;
 
     /* Separator */
     public static final String SEPARATOR = "\t";
@@ -34,6 +35,7 @@ public class Bomb {
         this.point = new Point(bomb.point);
         this.targeteDate = bomb.targeteDate;
         this.targetedBy = bomb.targetedBy;
+        this.isPickedUp = bomb.isPickedUp;
     }
 
     /**
@@ -44,6 +46,7 @@ public class Bomb {
     public void untarget() {
         this.targetedBy = null;
         this.targeteDate = null;
+        this.isPickedUp = false;
     }
 
     /**
@@ -53,6 +56,20 @@ public class Bomb {
      */
     public void target(BombSweeperAgent agent) {
         target(agent.getLocalName(), new Date());
+    }
+
+    /**
+     * Mark the bomb as picked-up
+     */
+    public void pickUp() {
+        this.isPickedUp = true;
+    }
+
+    /**
+     * Mark the bomb as droped
+     */
+    public void drop() {
+        this.isPickedUp = false;
     }
 
     /**
