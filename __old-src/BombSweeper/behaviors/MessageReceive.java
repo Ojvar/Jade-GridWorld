@@ -15,6 +15,7 @@ public class MessageReceive extends CyclicBehaviour {
     /* Messages types */
     public static final String C_NEW_BOMB = "new-bomb";
     public static final String C_TARGET_BOMB = "target-bomb";
+    public static final String C_UNTARGET_BOMB = "untarget-bomb";
     public static final String C_PICK_BOMB = "pick-up-bomb";
     public static final String C_TRAP_BOMB = "trap-bomb";
 
@@ -38,7 +39,7 @@ public class MessageReceive extends CyclicBehaviour {
         }
 
         String content = message.getContent().toString().toLowerCase();
-        System.out.println(this.agent.getLocalName() + " " + content);
+        // System.out.println(this.agent.getLocalName() + " " + content);
 
         /* Add bomb to agents list */
         String[] messageData = content.split("\t");
@@ -50,6 +51,10 @@ public class MessageReceive extends CyclicBehaviour {
         /* Target bomb */
         else if (messageData[0].equals(C_TARGET_BOMB)) {
             targetBombEvent(messageData);
+        }
+        /* UnTarget bomb */
+        else if (messageData[0].equals(C_UNTARGET_BOMB)) {
+            untargetBombEvent(messageData);
         }
         /* PickUP bomb */
         else if (messageData[0].equals(C_PICK_BOMB)) {
@@ -75,7 +80,7 @@ public class MessageReceive extends CyclicBehaviour {
         agent.trapBomb(sender, bombPoint);
 
         /* Log */
-        System.out.println("TRAP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
+        // System.out.println("TRAP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
     }
 
     /**
@@ -92,7 +97,7 @@ public class MessageReceive extends CyclicBehaviour {
         agent.markBombAsPickedUp(sender, bombPoint);
 
         /* Log */
-        System.out.println("PICKUP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
+        // System.out.println("PICKUP-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
     }
 
     /**
@@ -109,7 +114,24 @@ public class MessageReceive extends CyclicBehaviour {
         agent.markBombAsTargeted(sender, bombPoint);
 
         /* Log */
-        System.out.println("TARGET-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
+        // System.out.println("TARGET-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
+    }
+
+    /**
+     * UNTarget Bomb Event
+     * 
+     * @param messageData
+     */
+    private void untargetBombEvent(String[] messageData) {
+        String sender = messageData[1];
+        String[] pointData = messageData[2].split(",");
+
+        /* Mark as targeted */
+        Point bombPoint = new Point(Integer.valueOf(pointData[0]), Integer.valueOf(pointData[1]));
+        agent.untargetBomb(sender, bombPoint);
+
+        /* Log */
+        // System.out.println("UNTARGET-BOMB-MESSAGE\t" + sender + " " + messageData[2]);
     }
 
     /**

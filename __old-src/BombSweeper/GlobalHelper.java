@@ -64,7 +64,7 @@ public class GlobalHelper {
                     }
                 }
 
-                System.out.println("Distance Agent and bomb " + point.toString() + " " + nearestBomb.point.toString());
+                // System.out.println("Distance Agent and bomb " + point.toString() + " " + nearestBomb.point.toString());
             }
         }
 
@@ -98,7 +98,7 @@ public class GlobalHelper {
                 }
             }
 
-            System.out.println("Distance Agent and trap " + point.toString() + " " + nearestTrap.toString());
+            // System.out.println("Distance Agent and trap " + point.toString() + " " + nearestTrap.toString());
         }
 
         return nearestTrap;

@@ -1,6 +1,7 @@
+
 import java.awt.Point;
 
-import Helpers.GlobalHelper;
+import BombSweeper.GlobalHelper;
 import gridworld.LogicalEnv;
 import gridworld.TypeObject;
 import gridworld.lib.ObsVectListener;
@@ -20,7 +21,7 @@ import jade.wrapper.StaleProxyException;
 public class Main {
     /* Agent colors */
     private final static String[] C_AGENTS = new String[] { "blue", "red", "green", "pink", "orange", "cyan", };
-    private final static int C_AGENTS_COUNT = 2;
+    private final static int C_AGENTS_COUNT = 5;
     private final static int C_SENSE_RANGE = 1;
 
     /**
@@ -28,7 +29,7 @@ public class Main {
      *
      * @throws StaleProxyException
      */
-    public static void main(String[] args) {
+    public static void _main(String[] args) {
         Main.initEnv();
     }
 
@@ -61,7 +62,6 @@ public class Main {
     private static void setupGrid() {
         final LogicalEnv env = LogicalEnv.getEnv();
 
-        /* Setup sense range */
         env.setSenseRange(C_SENSE_RANGE);
 
         /* Add trap listener */

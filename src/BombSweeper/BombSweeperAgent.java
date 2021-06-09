@@ -1,269 +1,172 @@
 package BombSweeper;
 
 import java.awt.Point;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
-import BombSweeper.behaviors.MessageReceive;
-import BombSweeper.behaviors.SendBombDiscoverMessage;
-import BombSweeper.behaviors.SendPickUpBombMessage;
-import BombSweeper.behaviors.SendTargetBombMessage;
-import BombSweeper.behaviors.SendTrapBombMessage;
+import BombSweeper.Messages.MessageReceiver;
+import BombSweeper.Messages.SenseBombMessage;
+import BombSweeper.Messages.TargetBombMessage;
+import Helpers.Bomb;
+import Helpers.BombsManager;
+import Helpers.GlobalHelper;
 import gridworld.LogicalEnv;
-import gridworld.TypeObject;
 import jade.core.Agent;
 
 /**
- * Bomb Sweeper import jade.lang.acl.ACLMessage;agent class
+ * Bomb sweeper agent class
  */
 public class BombSweeperAgent extends Agent {
     /* Thread delay vlaue */
-    private static final int C_DELAY_VALUE = 500;
+    private final LogicalEnv env = LogicalEnv.getEnv();
+    private final static int C_DELAY_VALUE = 1000;
 
+    /* Private agent's data */
+    public Date deployTime = new Date();
     private String color;
-    private Bomb selectedBomb = null;
-    private Map<String, Bomb> bombs = new HashMap<String, Bomb>();
+    private BombsManager bombManager = new BombsManager(this);
 
     /**
-     * Setup
+     * Setup agent
      */
     @Override
     protected void setup() {
         super.setup();
 
+        /* Check input arguments */
         Object[] args = getArguments();
         if (0 == args.length) {
             System.out.println("Insufficient arguments");
 
-            deleteAgent();
-            return;
+            this.deleteAgent();
+        } else {
+            /* Setup agent */
+            this.color = args[0].toString();
+
+            /* Add to agents list */
+            GlobalHelper.addAgent(this);
+            System.out.printf("\n\nAgent %s has been deployed succesfully\n", color);
+
+            /* Try to start the agent */
+            this.startAgent();
         }
+    }
 
-        /* Add to agents list */
-        GlobalHelper.agents.put(this.getLocalName(), this);
-
-        /* Setup agent */
-        this.color = args[0].toString();
-        System.out.printf("\n\nAgent %s has been deployed succesfully\n", color);
-
-        this.explore();
+    /**
+     * Make a delay
+     */
+    protected void makeDelay() {
+        /* Make a delay */
+        try {
+            Thread.sleep(BombSweeperAgent.C_DELAY_VALUE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Delete agent
      */
-    private void deleteAgent() {
-        /* Remove agent from list */
-        if (GlobalHelper.agents.containsKey(BombSweeperAgent.this.getLocalName())) {
-            GlobalHelper.agents.remove(BombSweeperAgent.this.getLocalName());
-        }
-
+    private synchronized void deleteAgent() {
+        GlobalHelper.removeAgent(this);
         doDelete();
     }
 
     /**
-     * update bombs list
+     * Explore the grid-world
      */
-    private void updateBombsList(LogicalEnv env) {
-        String name = getLocalName();
-        Set<Point> sensedBombs = env.senseBombs(name);
-        Iterator<Point> iterator = sensedBombs.iterator();
-
-        while (iterator.hasNext()) {
-            Point bombPoint = iterator.next();
-
-            this.addBombToList(name, bombPoint);
-        }
-    }
-
-    /**
-     * Add a bomb to list
-     * 
-     * @param bombPoint
-     */
-    public void addBombToList(String sender, Point bombPoint) {
-        String name = getLocalName();
-
-        if (!bombs.containsKey(bombPoint.toString())) {
-            System.out.printf("\n%s\tBOMB found at %s by %s\n\n", name, bombPoint.toString(), sender);
-
-            /* Add to bombs list */
-            Bomb newBomb = new Bomb(bombPoint);
-            bombs.put(bombPoint.toString(), newBomb);
-
-            /* Send message to all */
-            if (sender.equals(name)) {
-                addBehaviour(new SendBombDiscoverMessage(BombSweeperAgent.this, newBomb));
+    private void startAgent() {
+        if (this.enterAgent()) {
+            try {
+                this.addEventHandler();
+                this.beginExplore();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                this.deleteAgent();
             }
+        } else {
+            System.out.printf("\n\nAgent %s creation failed\n", this.color);
+            this.deleteAgent();
         }
     }
 
     /**
-     * Mark a bomb as targeted
-     * 
-     * @param bombPoint
+     * Add event-handler
      */
-    public void markBombAsTargeted(String agent, Point bombPoint) {
+    private void addEventHandler() {
+        this.addBehaviour(new MessageReceiver(this));
+    }
+
+    /**
+     * Try to enter an agent
+     * 
+     * @return {boolean}
+     */
+    private boolean enterAgent() {
         String name = getLocalName();
 
-        if (bombs.containsKey(bombPoint.toString())) {
-            System.out.printf("\n%s\tBOMB targeted at %s by %s\n\n", name, bombPoint.toString(), agent);
+        /* Create new agent */;
+        double xPos = new Random().nextInt(env.getWidth());
+        double yPos = new Random().nextInt(env.getHeight());
 
-            /* Add to bombs list */
-            Bomb bomb = bombs.get(bombPoint.toString());
+        /* TODO: REMOVE AFTER TEST */
+        if (this.color.equals("red")) {
+            xPos = 1;
+            yPos = 1;
+        } else if (this.color.equals("blue")) {
+            xPos = 3;
+            yPos = 1;
+        }
 
-            if (null == bomb.targetedBy) {
-                bomb.markAsTargeted(agent);
+        return env.enter(name, xPos, yPos, this.color);
+    }
+
+    /**
+     * Begin explore
+     */
+    private void beginExplore() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (BombSweeperAgent.this.isAlive()) {
+                    /* Send agent state message -- for tracing purpose */
+                    BombSweeperAgent.this.logState();
+
+                    /* Make a delay */
+                    BombSweeperAgent.this.makeDelay();
+
+                    /* 1- Sense bombs and Target nearest bomb */
+                    BombSweeperAgent.this.senseBombs();
+
+                    /* 2- If we have not any */
+
+                    /* X - Move agent */
+                    // BombSweeperAgent.this.moveAgent(new Point(0, 0));
+                }
             }
-        }
-    }
-
-    /**
-     * Trap a bomb
-     * 
-     * @param bombPoint
-     */
-    public void trapBomb(String agent, Point bombPoint) {
-        if (bombs.containsKey(bombPoint.toString())) {
-            System.out.printf("\nBOMB trapped at %s by %s\n\n", bombPoint.toString(), agent);
-
-            /* Add to bombs list */
-            bombs.remove(bombPoint.toString());
-        }
-    }
-
-    /**
-     * Mark a bomb as picked-up
-     * 
-     * @param bombPoint
-     */
-    public void markBombAsPickedUp(String agent, Point bombPoint) {
-        if (bombs.containsKey(bombPoint.toString())) {
-            System.out.printf("\nBOMB picked-up at %s by %s\n\n", bombPoint.toString(), agent);
-
-            /* Add to bombs list */
-            bombs.get(bombPoint.toString()).pickedUpBy = agent;
-        }
-    }
-
-    /**
-     * Clear the selected bomb
-     * 
-     * @param bombPoint
-     */
-    public void clearSelectedBomb() {
-        String name = getLocalName();
-
-        this.selectedBomb = null;
-        System.out.println(name + "\t SelectedBomb has been cleared");
-
-        /* Send message to all agents */
+        }).start();
     }
 
     /**
      * Move agent
      */
-    private void moveAgent(LogicalEnv env) {
-        String name = getLocalName();
-        Point agentPoint = env.getPosition(this.getLocalName());
-
-        /* If agent has a targeted bomb */
-        if (null != this.selectedBomb) {
-            /* If bomb has not been picked-up yet */
-            if (null == this.selectedBomb.pickedUpBy) {
-                TypeObject tObj = env.isBomb(agentPoint);
-
-                if (null != tObj) {
-                    /* Pick up the bomb */
-                    env.pickup(name);
-
-                    /* Mark bomb as picked-up */
-                    markBombAsPickedUp(name, agentPoint);
-
-                    /* Send pickup bomb message */
-                    addBehaviour(new SendPickUpBombMessage(BombSweeperAgent.this, this.selectedBomb));
-                } else {
-                    /* Move toward the bomb to picked it up */
-                    moveToPoint(env, this.selectedBomb.point);
-                }
-            }
-            /* If bomb is picked-up */
-            else {
-                Point nearestTrap = GlobalHelper.nearestTrap(agentPoint);
-
-                if (null == nearestTrap) {
-                    System.out.println(name + "\tNo Any trap found");
-                } else {
-                    System.out.println(name + "\t" + agentPoint.toString() + "\tMoving toward the nearest trap"
-                            + nearestTrap.toString());
-
-                    /* If we are at the trap point */
-                    if (agentPoint.equals(nearestTrap)) {
-                        /* If agent could drop the bomb in trap successfully */
-                        if (env.drop(name)) {
-                            /* Find trapped bomb */
-                            if (bombs.containsKey(this.selectedBomb.point.toString())) {
-                                /* Trap the bomb */
-                                this.trapBomb(name, this.selectedBomb.point);
-                                System.out.println(name + "\t Dropping bomb in trap successflully");
-
-                                /* Send message to other agents */
-                                addBehaviour(new SendTrapBombMessage(BombSweeperAgent.this, this.selectedBomb));
-
-                                /* Clear seleted bomb */
-                                this.clearSelectedBomb();
-                            }
-                        }
-                    } else {
-                        /* move to the neareset trap */
-                        moveToPoint(env, nearestTrap);
-                    }
-                }
-            }
-        }
-        /* NO any bomb selected */
-        else {
-            /* Random move */
-            if (0 == bombs.size()) {
-                this.moveToPoint(env, new Point(0, 0));
-            }
-            /* Move towrad the nearest bomb */
-            else {
-                Bomb nearestBomb = GlobalHelper.nearestBomb(agentPoint, bombs);
-
-                if (null == nearestBomb) {
-                    this.moveToPoint(env, new Point(0, 0));
-                    return;
-                }
-
-                System.out.println(name + "\tSelected nearest bomb is " + nearestBomb.point.toString());
-
-                /* Select the nearest bomb */
-                this.selectedBomb = nearestBomb;
-
-                /* Mark as targeted */
-                markBombAsTargeted(name, this.selectedBomb.point);
-
-                /* Move toward the bomb */
-                this.moveToPoint(env, this.selectedBomb.point);
-
-                /* Send message to all */
-                this.addBehaviour(new SendTargetBombMessage(BombSweeperAgent.this, this.selectedBomb));
-            }
+    protected void moveAgent(Point point) {
+        /* Move random */
+        if (point.equals(new Point(0, 0))) {
+            this.moveToPoint(new Point(0, 0), true);
         }
     }
 
     /**
      * Move agent toward a point
      */
-    private void moveToPoint(LogicalEnv env, Point targetPoint) {
+    private synchronized void moveToPoint(Point point, boolean moveRandOnFailed) {
         int direction = 0;
         String agentName = getLocalName();
 
-        if ((0 == targetPoint.x) && (0 == targetPoint.y)) {
+        if (point.equals(new Point(0, 0))) {
             /* Random move */
             direction = new Random().nextInt(4) + 1;
         } else {
@@ -274,22 +177,22 @@ public class BombSweeperAgent extends Agent {
             String selectedAxis;
 
             /* If both axis are free to go */
-            if ((agentPoint.x != targetPoint.x) && (agentPoint.y != targetPoint.y)) {
+            if ((agentPoint.x != point.x) && (agentPoint.y != point.y)) {
                 selectedAxis = new Random().nextBoolean() ? "X" : "Y";
-            } else if (agentPoint.x != targetPoint.x) {
+            } else if (agentPoint.x != point.x) {
                 selectedAxis = "X";
             } else {
                 selectedAxis = "Y";
             }
 
             if (selectedAxis.equals("X")) {
-                if (agentPoint.x > targetPoint.x) {
+                if (agentPoint.x > point.x) {
                     direction = 4; /* West */
                 } else {
                     direction = 3; /* East */
                 }
             } else {
-                if (agentPoint.y > targetPoint.y) {
+                if (agentPoint.y > point.y) {
                     direction = 1; /* North */
                 } else {
                     direction = 2; /* South */
@@ -298,66 +201,113 @@ public class BombSweeperAgent extends Agent {
         }
 
         /* Move agent */
+        boolean moveResult = true;
         switch (direction) {
             case 1:
-                env.north(agentName);
+                moveResult = env.north(agentName);
                 break;
 
             case 2:
-                env.south(agentName);
+                moveResult = env.south(agentName);
                 break;
 
             case 3:
-                env.east(agentName);
+                moveResult = env.east(agentName);
                 break;
 
             case 4:
-                env.west(agentName);
+                moveResult = env.west(agentName);
                 break;
+        }
+
+        /*
+         * Check moving result If moving has failed,[and we are allowed] We do a random
+         * move
+         */
+        if (!moveResult && moveRandOnFailed) {
+            moveToPoint(new Point(0, 0), false);
         }
     }
 
     /**
-     * Explore
+     * Sense bombs
      */
-    private void explore() {
-        String name = getLocalName();
-        final LogicalEnv env = LogicalEnv.getEnv();
+    protected void senseBombs() {
+        /* Update bombs list */
+        ArrayList<Bomb> bombs = this.bombManager.updateBombs();
 
-        /* Create new agent */;
-        double xPos = new Random().nextInt(env.getWidth());
-        double yPos = new Random().nextInt(env.getHeight());
-        if (!env.enter(name, xPos, yPos, this.color)) {
-            System.out.printf("\n\nAgent %s creation failed\n", this.color);
-
-            this.deleteAgent();
+        if (0 == bombs.size()) {
             return;
         }
 
-        /* Setup recieve behaviour */
-        BombSweeperAgent.this.addBehaviour(new MessageReceive(BombSweeperAgent.this));
+        /* Send all bombs data to ther */
+        Iterator<Bomb> iter = bombs.iterator();
+        while (iter.hasNext()) {
+            Bomb bomb = iter.next();
 
-        /* Create explor thread */
-        new Thread(new Runnable() {
-            /**
-             * Run
-             */
-            @Override
-            public void run() {
-                try {
-                    while (BombSweeperAgent.this.isAlive()) {
-                        Thread.sleep(C_DELAY_VALUE);
+            this.sendSenseBombMessage(bomb);
+        }
 
-                        /* Sense all possible bombs */
-                        BombSweeperAgent.this.updateBombsList(env);
+        /* Select the nearest bomb */
+        Bomb bomb = this.bombManager.selectNearestBomb();
+        if (null != bomb) {
+            this.sendTargetBombMessage(bomb);
+        }
+    }
 
-                        /* Move [randomly] */
-                        BombSweeperAgent.this.moveAgent(env);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+    /**
+     * Mark bomb as targeted
+     * 
+     * @param bomb
+     */
+    public void markBombAsTargeted(Bomb bomb) {
+        bombManager.markBombAsTargeted(bomb);
+    }
+
+    /**
+     * Send target bomb message
+     */
+    public void sendTargetBombMessage(Bomb bomb) {
+        addBehaviour(new TargetBombMessage(this, bomb));
+    }
+
+    /**
+     * Send sense bomb message
+     * 
+     * @param bomb
+     */
+    public void sendSenseBombMessage(Bomb bomb) {
+        addBehaviour(new SenseBombMessage(this, bomb));
+    }
+
+    /**
+     * Add new bomb
+     */
+    public void addNewBomb(Bomb bomb) {
+        this.bombManager.addNewBomb(bomb);
+    }
+
+    /**
+     * Get location
+     * 
+     * @return
+     */
+    public Point getLocation() {
+        return env.getPosition(this.getLocalName());
+    }
+
+    /**
+     * Log state
+     */
+    private void logState() {
+        String result = getLocalName();
+
+        Iterator<Bomb> iter = this.bombManager.getBombs().values().iterator();
+        while (iter.hasNext()) {
+            Bomb bomb = iter.next();
+            result += "\n\t BOMB\t" + bomb.toString();
+        }
+
+        GlobalHelper.logMessage(result);
     }
 }
