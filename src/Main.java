@@ -19,8 +19,9 @@ import jade.wrapper.StaleProxyException;
  */
 public class Main {
     /* Agent colors */
-    private final static String[] C_AGENTS = new String[] { "blue", "red", "green", "pink", "orange", "cyan", };
-    private final static int C_AGENTS_COUNT = 2;
+    private final static String[] C_AGENTS = new String[] { "blue", "red", "green", "pink", "orange", "cyan", "black",
+            "brown", "yellow", "white" };
+    private final static int C_AGENTS_COUNT = C_AGENTS.length;
     private final static int C_SENSE_RANGE = 1;
 
     /**
